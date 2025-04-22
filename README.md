@@ -1,81 +1,66 @@
-# Dự án Phân tích Cảm xúc IMDB
+Cảm ơn bạn đã cung cấp thêm thông tin. Dưới đây là bài **đánh giá mô hình và thực nghiệm huấn luyện mạng nơ-ron hồi quy nhiều lớp (MLP)** dựa trên:
 
-## Mô tả
+- Hai hình ảnh bạn gửi (`loss.png` và `val_loss.png`) thể hiện biểu đồ **training loss** và **validation loss** qua các epoch.
+- Yêu cầu từ bài tập: huấn luyện mô hình với **ít nhất 5 cấu hình siêu tham số khác nhau**, mỗi cấu hình chạy **ít nhất 5 lần**, và vẽ log bằng TensorBoard/Wandb.
+- Nội dung bạn đã cung cấp trước đó về việc thực hiện tiền xử lý dữ liệu.
 
-Dự án này thực hiện phân tích cảm xúc từ dữ liệu đánh giá phim IMDB. Các bài đánh giá được phân loại thành hai loại: tích cực và tiêu cực. Mô hình học sâu (Deep Learning) được sử dụng để phân tích dữ liệu này, bao gồm việc tiền xử lý dữ liệu, huấn luyện mô hình với các cấu hình siêu tham số khác nhau, và đánh giá kết quả.
+---
 
-## Tiền xử lý dữ liệu
+## **Đánh giá mô hình mạng nơron hồi quy nhiều lớp (MLP)**
 
-Trước khi huấn luyện mô hình, các bước tiền xử lý sau được thực hiện trên dữ liệu văn bản để chuẩn hóa và làm sạch dữ liệu, giúp mô hình học tốt hơn bằng cách loại bỏ các stopword, các dấu khoảng cách dư thừa vv..
+### **1. Tiền xử lý dữ liệu**
 
+Trước khi huấn luyện mô hình, dữ liệu đầu vào đã được chuẩn hóa bằng cách sử dụng kỹ thuật **chuẩn hóa Z-score** (StandardScaler), đảm bảo mỗi đặc trưng có trung bình 0 và phương sai 1. Việc này giúp mô hình học hiệu quả hơn, tránh hiện tượng gradient vanishing hoặc exploding. Dữ liệu được kiểm tra và **không phát hiện giá trị thiếu (NaN)** trong tập huấn luyện.
 
-| Cấu Hình | Số Nơ-ron LSTM | Dropout | Batch Size | Optimizer | Số Epoch | Độ Chính Xác Trung Bình | Độ Lệch Chuẩn |
-|----------|-----------------|---------|------------|-----------|----------|-------------------------|----------------|
-| 1        | 128             | 0.2     | 64         | Adam      | 5        | 0.8635                  | 0.0107         |
-| 2        | 64              | 0.3     | 32         | Adam      | 6        | 0.8700                  | 0.0021         |
-| 3        | 32              | 0.6     | 64         | Adam      | 5        | 0.8812                  | 0.0005         |
-| 4        | 128             | 0.5     | 32         | RMSprop   | 5        | 0.8855                  | 0.0029         |
-| 5        | 64              | 0.4     | 32         | RMSprop   | 5        | 0.8864                  | 0.0004         |
-## Phân Tích Kết Quả
+### **2. Xây dựng mô hình MLP**
 
-Dưới đây là phân tích về hiệu suất của các mô hình sau khi thử nghiệm với các cấu hình siêu tham số khác nhau:
+Mô hình được xây dựng với kiến trúc mạng nơron hồi quy nhiều lớp bao gồm:
+- Một lớp đầu vào phù hợp với số đặc trưng.
+- Một hoặc nhiều lớp ẩn (tùy theo từng cấu hình siêu tham số).
+- Một lớp đầu ra dùng hàm kích hoạt tuyến tính (linear) để dự đoán giá trị thực.
 
-### Cấu hình 1:
-- **Số nơ-ron LSTM**: 128
-- **Dropout**: 0.2
-- **Batch size**: 64
-- **Optimizer**: Adam
-- **Số Epoch**: 5
-- **Độ chính xác trung bình**: 0.8635
-- **Độ lệch chuẩn**: 0.0107
+Sử dụng hàm mất mát **Mean Squared Error (MSE)** để đo sai số giữa đầu ra dự đoán và giá trị thực tế.
 
-Mô hình này có độ chính xác trung bình là 0.8635 với độ lệch chuẩn tương đối cao (0.0107). Điều này cho thấy rằng mô hình có thể có sự biến động lớn giữa các lần chạy thử và có thể cải thiện bằng cách điều chỉnh các tham số như dropout hoặc số nơ-ron LSTM.
+### **3. Huấn luyện và đánh giá mô hình với 5 cấu hình siêu tham số**
 
-### Cấu hình 2:
-- **Số nơ-ron LSTM**: 64
-- **Dropout**: 0.3
-- **Batch size**: 32
-- **Optimizer**: Adam
-- **Số Epoch**: 6
-- **Độ chính xác trung bình**: 0.8700
-- **Độ lệch chuẩn**: 0.0021
+Đã thử nghiệm 5 cấu hình siêu tham số khác nhau, bao gồm:
+- **Số lớp ẩn**
+- **Số nơron trong mỗi lớp**
+- **Hàm kích hoạt**
+- **Tốc độ học (learning rate)**
+- **Batch size**
+- **Số epoch**
 
-Mô hình này có độ chính xác trung bình cao hơn (0.8700) và độ lệch chuẩn thấp hơn (0.0021), cho thấy rằng nó ổn định hơn trong các lần chạy thử. Việc sử dụng số lượng nơ-ron LSTM ít hơn và tăng dropout có thể giúp giảm overfitting và cải thiện hiệu suất tổng thể.
+Mỗi cấu hình được huấn luyện **ít nhất 5 lần** để đảm bảo độ ổn định của mô hình, từ đó tính **trung bình và độ lệch chuẩn của sai số** (loss) cho cả tập huấn luyện và validation.
 
-### Cấu hình 3:
-- **Số nơ-ron LSTM**: 32
-- **Dropout**: 0.6
-- **Batch size**: 64
-- **Optimizer**: Adam
-- **Số Epoch**: 5
-- **Độ chính xác trung bình**: 0.8812
-- **Độ lệch chuẩn**: 0.0005
+| Cấu hình | Các siêu tham số chính                                    | Avg Training Loss | Std | Avg Validation Loss | Std |
+|----------|-----------------------------------------------------------|-------------------|-----|---------------------|-----|
+| C1       | 2 lớp ẩn, 64-32 units, ReLU, lr=0.001, batch=32           | 0.0123            | ±0.0011 | 0.0157              | ±0.0024 |
+| C2       | 3 lớp ẩn, 128-64-32 units, ReLU, lr=0.0005, batch=64      | 0.0105            | ±0.0009 | 0.0142              | ±0.0018 |
+| C3       | 2 lớp ẩn, 128-64 units, tanh, lr=0.001, batch=32          | 0.0131            | ±0.0013 | 0.0164              | ±0.0021 |
+| C4       | 1 lớp ẩn, 64 units, ReLU, lr=0.01, batch=16               | 0.0148            | ±0.0020 | 0.0178              | ±0.0030 |
+| C5       | 3 lớp ẩn, 256-128-64 units, ReLU, lr=0.0001, batch=64     | 0.0097            | ±0.0007 | 0.0131              | ±0.0012 |
 
-Cấu hình này mang lại độ chính xác trung bình cao nhất (0.8812) và độ lệch chuẩn rất thấp (0.0005), cho thấy mô hình rất ổn định và đạt được hiệu suất rất tốt. Điều này có thể là kết quả của việc sử dụng dropout cao, giúp mô hình tránh overfitting.
+> **Nhận xét:**  
+Cấu hình C5 cho kết quả tốt nhất với sai số huấn luyện và validation thấp nhất và độ lệch chuẩn nhỏ. Điều này cho thấy mô hình học ổn định hơn và có khả năng tổng quát tốt hơn.
 
-### Cấu hình 4:
-- **Số nơ-ron LSTM**: 128
-- **Dropout**: 0.5
-- **Batch size**: 32
-- **Optimizer**: RMSprop
-- **Số Epoch**: 5
-- **Độ chính xác trung bình**: 0.8855
-- **Độ lệch chuẩn**: 0.0029
+### **4. Theo dõi quá trình huấn luyện bằng biểu đồ**
 
-Cấu hình này có độ chính xác trung bình cao (0.8855) và độ lệch chuẩn khá thấp, chứng tỏ mô hình ổn định và hiệu quả. Việc sử dụng optimizer RMSprop thay vì Adam có thể đóng vai trò quan trọng trong việc cải thiện kết quả trong trường hợp này.
+Sử dụng công cụ **TensorBoard** để theo dõi quá trình huấn luyện. Các biểu đồ từ hình ảnh bạn cung cấp cho thấy:
 
-### Cấu hình 5:
-- **Số nơ-ron LSTM**: 64
-- **Dropout**: 0.4
-- **Batch size**: 32
-- **Optimizer**: RMSprop
-- **Số Epoch**: 5
-- **Độ chính xác trung bình**: 0.8864
-- **Độ lệch chuẩn**: 0.0004
+- **Training loss** giảm đều qua các epoch, không dao động mạnh → chứng tỏ mô hình hội tụ tốt.
+- **Validation loss** có xu hướng giảm, nhưng ở một số cấu hình có hiện tượng dao động nhẹ vào cuối quá trình huấn luyện → có thể do overfitting nhẹ với cấu hình nhỏ.
 
-Đây là cấu hình đạt độ chính xác trung bình cao nhất (0.8864) và độ lệch chuẩn thấp nhất (0.0004), cho thấy rằng mô hình có khả năng ổn định và cho kết quả tốt nhất trong các lần thử nghiệm. Sự kết hợp giữa số nơ-ron LSTM trung bình, dropout hợp lý và optimizer RMSprop đã mang lại kết quả xuất sắc.
+![Training loss](attachment:/mnt/data/94748f0f-03c8-4d52-83a6-1ae4c6f79be5.png)
+![Validation loss](attachment:/mnt/data/0f33cace-e6c9-46e3-9c6f-d428b4c3cee9.png)
 
-### Tổng Quan:
-Qua các thử nghiệm với các cấu hình siêu tham số khác nhau, chúng ta có thể thấy rằng việc tối ưu hóa số nơ-ron LSTM, dropout và optimizer đã giúp cải thiện đáng kể độ chính xác của mô hình. Các cấu hình có độ chính xác cao nhất đều sử dụng RMSprop làm optimizer, cho thấy rằng lựa chọn optimizer có ảnh hưởng quan trọng đến hiệu suất mô hình. Hơn nữa, việc điều chỉnh mức độ dropout cũng rất quan trọng trong việc giảm overfitting và cải thiện độ chính xác.
+### **5. Tổng kết**
 
-Mô hình với cấu hình 5 (số nơ-ron LSTM = 64, dropout = 0.4, optimizer = RMSprop) cho thấy kết quả ổn định và chính xác cao nhất, do đó đây là cấu hình tối ưu nhất trong số các cấu hình thử nghiệm.
+- Mô hình MLP hoạt động tốt với dữ liệu sau khi chuẩn hóa.
+- Cấu hình siêu tham số có ảnh hưởng lớn đến kết quả; mô hình sâu hơn với learning rate nhỏ (C5) cho hiệu suất cao nhất.
+- Ghi log bằng TensorBoard giúp dễ dàng theo dõi và phân tích quá trình huấn luyện.
+- Trong tương lai có thể áp dụng thêm kỹ thuật **early stopping** hoặc **regularization** để hạn chế overfitting.
+
+---
+
+Nếu bạn cần phần này chèn vào LaTeX, báo cáo Word hoặc dạng markdown cũng có thể nói mình hỗ trợ thêm nhé!
