@@ -1,13 +1,3 @@
-Cảm ơn bạn đã cung cấp thêm thông tin. Dưới đây là bài **đánh giá mô hình và thực nghiệm huấn luyện mạng nơ-ron hồi quy nhiều lớp (MLP)** dựa trên:
-
-- Hai hình ảnh bạn gửi (`loss.png` và `val_loss.png`) thể hiện biểu đồ **training loss** và **validation loss** qua các epoch.
-- Yêu cầu từ bài tập: huấn luyện mô hình với **ít nhất 5 cấu hình siêu tham số khác nhau**, mỗi cấu hình chạy **ít nhất 5 lần**, và vẽ log bằng TensorBoard/Wandb.
-- Nội dung bạn đã cung cấp trước đó về việc thực hiện tiền xử lý dữ liệu.
-
----
-
-## **Đánh giá mô hình mạng nơron hồi quy nhiều lớp (MLP)**
-
 ### **1. Tiền xử lý dữ liệu**
 
 Trước khi huấn luyện mô hình, dữ liệu đầu vào đã được chuẩn hóa bằng cách sử dụng kỹ thuật **chuẩn hóa Z-score** (StandardScaler), đảm bảo mỗi đặc trưng có trung bình 0 và phương sai 1. Việc này giúp mô hình học hiệu quả hơn, tránh hiện tượng gradient vanishing hoặc exploding. Dữ liệu được kiểm tra và **không phát hiện giá trị thiếu (NaN)** trong tập huấn luyện.
